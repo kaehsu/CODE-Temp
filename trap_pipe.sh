@@ -96,3 +96,5 @@ while [ $TIMES -gt 0 ]; do
 	TIMES=$((TIMES -1))
 	sleep $SLEEP
 done
+
+rm $NPIPE
