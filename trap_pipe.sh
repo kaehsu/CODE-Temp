@@ -1,6 +1,8 @@
 #!/bin/bash
 
-declare -i SLEEP=`cat trap.conf`
+TRAP_CONF="/home/pi/template.bash/trap.conf"
+
+declare -i SLEEP=`cat $TRAP_CONF`
 
 # Process repeat times; default is 100 times
 declare TIMES=100
@@ -48,7 +50,7 @@ trap "echo 'SIGPIPE(13) received.'" SIGPIPE
 trap "echo 'SIGALRM(14) received.'" SIGALRM
 trap "echo 'SIGTERM(15) received.'" SIGTERM
 trap "echo 'SIGSTKFLT(16) received.'" SIGSTKFLT
-trap "echo 'SIGSIGCHLD(17) received.'" SIGCHLD
+trap "echo 'SIGCHLD(17) received.'" SIGCHLD
 trap "echo 'SIGCONT(18) received.'" SIGCONT
 trap "echo 'SIGSTOP(19) received.'" SIGSTOP
 trap "echo 'SIGTSTP(20) received.'" SIGTSTP
@@ -70,7 +72,7 @@ trap "echo 'SIGRTMAC(64) received.'" 64		# Use signal number is accepted.
 
 function READCONF() {
 	echo "Re-read configuration file"
-	SLEEP=`cat trap.conf`
+	[ -f $TRAP_CONF ] && SLEEP=`cat trap.conf`
 	echo "New sleep timer is $SLEEP second(s)!"
 }
 
