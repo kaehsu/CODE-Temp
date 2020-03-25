@@ -68,7 +68,37 @@ trap "echo 'SIGSYS(31) received.'" SIGSYS
 trap "echo 'Signal (32) received.'" 32		# No signal match number 32, process will be terminated with message "Unknown signal 32"
 trap "echo 'Signal (33) received.'" 33		# No signal match number 33, process will be terminated with message "Unknown signal 33"
 trap "echo 'SIGRTMIN(34) received.'" 34		# Use signal number is accepted.
-trap "echo 'SIGRTMAC(64) received.'" 64		# Use signal number is accepted.
+trap "echo 'SIGRTMIN(35) received.'" 35
+trap "echo 'SIGRTMIN(36) received.'" 36
+trap "echo 'SIGRTMIN(37) received.'" 37
+trap "echo 'SIGRTMIN(38) received.'" 38
+trap "echo 'SIGRTMIN(39) received.'" 39
+trap "echo 'SIGRTMIN(40) received.'" 40
+trap "echo 'SIGRTMIN(41) received.'" 41
+trap "echo 'SIGRTMIN(42) received.'" 42
+trap "echo 'SIGRTMIN(43) received.'" 43
+trap "echo 'SIGRTMIN(44) received.'" 44
+trap "echo 'SIGRTMIN(45) received.'" 45
+trap "echo 'SIGRTMIN(46) received.'" 46
+trap "echo 'SIGRTMIN(47) received.'" 47
+trap "echo 'SIGRTMIN(48) received.'" 48
+trap "echo 'SIGRTMAX(49) received.'" 49
+trap "echo 'SIGRTMAX(50) received.'" 50
+trap "echo 'SIGRTMAX(51) received.'" 51
+trap "echo 'SIGRTMAX(52) received.'" 52
+trap "echo 'SIGRTMAX(53) received.'" 53
+trap "echo 'SIGRTMAX(54) received.'" 54
+trap "echo 'SIGRTMAX(55) received.'" 55
+trap "echo 'SIGRTMAX(56) received.'" 56
+trap "echo 'SIGRTMAX(57) received.'" 57
+trap "echo 'SIGRTMAX(58) received.'" 58
+trap "echo 'SIGRTMAX(59) received.'" 59
+trap "echo 'SIGRTMAX(60) received.'" 60
+trap "echo 'SIGRTMAX(61) received.'" 61
+trap "echo 'SIGRTMAX(62) received.'" 62
+trap "echo 'SIGRTMAX(63) received.'" 63
+trap "echo 'SIGRTMAX(64) received.'" 64
+trap "echo 'SIGRTMAX(64) received.'" 64	
 
 function READCONF() {
 	echo "Re-read configuration file"
