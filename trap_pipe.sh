@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 TRAP_CONF="/home/pi/template.bash/trap.conf"
 

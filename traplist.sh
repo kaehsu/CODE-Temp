@@ -1,4 +1,4 @@
-#!/usr/bin/env /bin/bash
+#!/usr/bin/env bash
 
 trap "echo 'SIGHUP(01) received.'" SIGHUP
 trap "echo 'SIGINT(02, Ctrl-C) received.'; exit 1" SIGINT
