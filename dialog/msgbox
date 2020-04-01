@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-DIALOG="/usr/bin/dialog"
-
-$DIALOG --msgbox "This is a test." 10 40
