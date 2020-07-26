@@ -5,7 +5,7 @@ from random import randint
 
 N1=N2=N3=N4=N5=N6=0
 
-start = time.clock()
+start = time.process_time()
 for i in range(0,int(sys.argv[1])):
     N = randint(1,6)
     if N == 1:
@@ -20,7 +20,7 @@ for i in range(0,int(sys.argv[1])):
         N5 += 1
     elif N == 6:
         N6 += 1
-stop = time.clock()
+stop = time.process_time()
 
 Total=N1+N2+N3+N4+N5+N6
 print('Total try: {} times in {} seconds'.format(Total,stop-start))
