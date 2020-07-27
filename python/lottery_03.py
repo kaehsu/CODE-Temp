@@ -26,7 +26,8 @@ for i in range(0, len(seedNumbers1)):
         rN = randint(1, 38)
         if rN in newNumbers:
             NrN = randint(1, 38)
-            print('Duplicate number {} found! Will replace to {}'.format(rN, NrN))
+            print('Duplicate number {} found! Will replace to {} for seedNumbers2[{}]'.format(
+                rN, NrN, seedNumbers2[i]))
             newNumbers.append(NrN)
         else:
             newNumbers.append(rN)
@@ -49,7 +50,8 @@ for i in range(0, len(seedNumbers2)):
         rN = randint(1, 38)
         if rN in newNumbers:
             NrN = randint(1, 38)
-            print('Duplicate number {} found! Will replace to {}'.format(rN, NrN))
+            print('Duplicate number {} found! Will replace to {} for seedNumbers2[{}]'.format(
+                rN, NrN, seedNumbers2[i]))
             newNumbers.append(NrN)
         else:
             newNumbers.append(rN)
@@ -61,5 +63,5 @@ print(comb_list3)
 print('There are total {} combinations from random number(seed by seedNumbers2), it will cost {} dollors.\n'.format(
     len(comb_list3), len(comb_list3)*8*100))
 
-print('Total cost is {}'.format(len(comb_list1)*8*100 +
-                                len(comb_list2)*8*100 + len(comb_list3)*8*100))
+print('Total cost is {} dollors.'.format(len(comb_list1)*8*100 +
+                                         len(comb_list2)*8*100 + len(comb_list3)*8*100))
