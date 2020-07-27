@@ -5,10 +5,10 @@ from random import randint, seed
 from itertools import combinations
 
 seedNumbers1 = [5, 22, 28, 15, 19, 24, 12, 23]
-seedNumbers2 = [27, 8, 10]
-newNumbers = []
+seedNumbers2 = [27, 8, 10, 27]
 
 # Step one, list all possible combinations of seedNumbers1
+seedNumbers1 = list(set(seedNumbers1))
 comb_list1 = []
 for combNumber in combinations(seedNumbers1, 6):
     comb_list1.append(combNumber)
@@ -18,6 +18,7 @@ print('There are total {} combinations from seedNumbers1, it will cost {} dollor
 
 # Step two, list all combination based on seedNumbers1
 comb_list2 = []
+newNumbers = []
 for i in range(0, len(seedNumbers1)):
     # print(seedNumbers[i])
     newNumbers.append(seedNumbers1[i])
@@ -40,6 +41,7 @@ print('There are total {} combinations from random number(seed by seedNumbers1),
     len(comb_list2), len(comb_list2)*8*100))
 
 # Step three, list all combination based on seedNumbers2
+seedNumbers2 = list(set(seedNumbers2))
 comb_list3 = []
 newNumbers = []
 for i in range(0, len(seedNumbers2)):

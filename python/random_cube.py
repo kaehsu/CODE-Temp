@@ -44,5 +44,5 @@ stop = time.process_time()
 
 Total = N1+N2+N3+N4+N5+N6
 print('Total try: {} times in {} seconds'.format(Total, stop-start))
-print('N1={}({})\nN2={}({})\nN3={}({})\nN4={}({})\nN5={}({})\nN6={}({})'.format(
+print('N1={}({:.5f})\nN2={}({:.5f})\nN3={}({:.5f})\nN4={}({:.5f})\nN5={}({:.5f})\nN6={}({:.5f})'.format(
     N1, N1/Total, N2, N2/Total, N3, N3/Total, N4, N4/Total, N5, N5/Total, N6, N6/Total))
