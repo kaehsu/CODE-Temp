@@ -1,0 +1,12 @@
+{
+    "status": {
+        "opMode": {
+            "freq": 1,
+            "dutyCycle": 100
+        },
+        "adMode": {
+            "freq": 1,
+            "dutyCycle": 100
+        }
+    }
+}
