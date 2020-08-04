@@ -26,13 +26,29 @@ GPIO.setmode(GPIO.BCM)
 for pin in totalPin:
     GPIO.setup(pin, GPIO.OUT, GPIO.PUD_OFF, GPIO.LOW)
 
+gLEDp = GPIO.PWM(pinGLED, 1)
+rLEDp = GPIO.PWM(pinRLED, 1)
+bLEDp = GPIO.PWM(pinBLED, 1)
+yLEDp = GPIO.PWM(pinYLED, 1)
+oLEDp = GPIO.PWM(pinOLED, 1)
+allLEDp = [gLEDp, rLEDp, bLEDp, yLEDp, oLEDp]
 
-try:
+for item in allLEDp:
+    item.start(100)
+
+try: 
     while True:
-        color, freq = input(
-            'Please enter the color(g, r, b, y, o) and frequency:')
-        if color in (g, r, b, y, o):
+        for item in allLEDp:
+            rNf = randint(1, 100)/10
+            rNd = randint(0, 100)
+            item.ChangeFrequency(rNf)
+            item.ChangeDutyCycle(rNd)
+        time.sleep(1)
 
 except KeyboardInterrupt:
     print('Program exit!')
+    for item in allLEDp:
+        item.stop()
     GPIO.cleanup()
+
+
