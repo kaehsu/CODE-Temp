@@ -71,17 +71,17 @@ def socketLED():
         while True:
             connection, address = sock.accept()
             serverIncoming = connection.recv(1024).decode()
-            #serverIncoming = serverIncomingraw.decode()
-            # connection.send(message.encode('utf-8'))      # Regular data should be encode before send
-            # Received data is encoded, can send directly
-            # connection.send(serverIncoming)
             try:
                 remoteCMDlist = serverIncoming.split(':')
                 if remoteCMDlist[0] == 'query':
                     serverOutput = 'You execute a query command.'
                     connection.send(serverOutput.encode('utf-8'))
+                    serverOutput = str(remoteCMDlist[1:])
+                    connection.send(serverOutput.encode('utf-8'))
                 elif remoteCMDlist[0] == 'set':
                     serverOutput = 'You execute a set command.'
+                    connection.send(serverOutput.encode('utf-8'))
+                    serverOutput = str(remoteCMDlist[1:])
                     connection.send(serverOutput.encode('utf-8'))
                 else:
                     serverOutput = 'Not a valid command, check your syntax.'
