@@ -5,58 +5,120 @@ import sys
 import socket
 import json
 # import RPi.GPIO as GPIO
+import threading
 
 # LED configuration file and socket address
 ledCONFIGfile = 'portex_led.conf'
 serverAddress = '/tmp/portex_led'
 
-# Read configuration from config files
-with open(ledCONFIGfile, 'r') as file:
-    ledCONFIG = file.read()
 
-ledStatustemp = {
-    "status": {
-        "opMode": {
-            "freq": 0,
-            "dutyCycle": 0
-        },
-        "adMode": {
-            "freq": 0,
-            "dutyCycle": 0
+def configInit():
+    '''
+    Initial the LED configuration data structure
+    '''
+    # Read configuration file
+    global ledCONFIG
+    with open(ledCONFIGfile, 'r') as file:
+        ledCONFIG = file.read()
+    # Data structure that did not be included in configuration file
+    aledStatustemp = {
+        "aledList": "gLED,rLED,bLED,yLED,oLED",
+        "currentStatus": "opMode",
+        "lastStatus": "opMode"
+    }
+    ledStatustemp = {
+        "status": {
+            "opMode": {
+                "freq": 0,
+                "dutyCycle": 0
+            },
+            "adMode": {
+                "freq": 0,
+                "dutyCycle": 0
+            }
         }
     }
-}
+    # Build LED configuration data structure
+    ledCONFIG = json.loads(ledCONFIG)
+    ledCONFIG['allLED'].update(aledStatustemp)
+    ledCONFIG['allLED']['powerSave']['powerSavetimer'] = ledCONFIG['allLED']['powerSave']['powerSavetimeout']
+    global allLEDlist
+    allLEDlist = ledCONFIG['allLED']['aledList'].split(',')
+    for item in allLEDlist:
+        ledCONFIG[item].update(ledStatustemp)
+        ledCONFIG[item]['status']['opMode'].update(ledCONFIG[item]['default'])
 
-# Build necessary data structure
-ledCONFIG = json.loads(ledCONFIG)
-allLED = ledCONFIG['allLED']['allLED'].split(',')
-for item in allLED:
-    ledCONFIG[item].update(ledStatustemp)
-    ledCONFIG[item]['status']['opMode'].update(ledCONFIG[item]['default'])
 
-'''
-# GPIO initialization & enable all LED in default
-GPIO.setmode(GPIO.BCM)
-for item in allLED:
-    GPIO.setup(ledCONFIG[item]['gpioNum'], GPIO.OUT, GPIO.PUD_OFF, GPIO.LOW)
-    globals()[item+'p'] = GPIO.PWM(ledCONFIG[item]
-                                   ['gpioNum'], ledCONFIG[item]['default']['freq'])
-    globals()[item+'p'].start(ledCONFIG[item]['default']['dutyCycle'])
-'''
+def configQuery(dictKeylist):
+    '''
+    Print the value by query key list, the first element in the list must 'query'.
+    The answer could be a str(), int() or dict().
+    '''
+    if dictKeylist[0] != 'query':
+        return 'Not a valid qurey, check your syntax.'
+    try:
+        cqResult = ledCONFIG
+        for item in range(1, len(dictKeylist)):
+            cqResult = cqResult[dictKeylist[item]]
+        return cqResult
+    except (NameError, TypeError, KeyError) as e:
+        return 'Not a valid query, check your syntax.'
+
+
+def configChange(dictKeylist):
+    '''
+    Change the LED configuration.
+    '''
+    if dictKeylist[0] != 'set':
+        return 'Not a valid change, check your syntax.'
+    try:
+        ccTargetold = ledCONFIG
+        for item in range(1, len(dictKeylist)-1):
+            ccTargetold = ccTargetold[dictKeylist[item]]
+        ccTargetpath = 'ledCONFIG'
+        for item in range(1, len(dictKeylist)-1):
+            ccTargetpath = ccTargetpath+"['"+str(dictKeylist[item])+"']"
+        if type(ccTargetold) == type(int()):
+            ccTargetnew = int(dictKeylist[-1])
+            changeCMD = ccTargetpath+'='+str(ccTargetnew)
+            exec(changeCMD)
+            return 'Value ' + str(ccTargetold) + ' change to ' + str(ccTargetnew)
+        # elif
+
+    except (NameError, TypeError, KeyError, ValueError) as e:
+        return 'Not a valid change exp, check your syntax.'
+
+
+def initGPIOpwm():
+    '''
+    GPIO initialization & enable all LED by default configuration.
+    '''
+    GPIO.setmode(GPIO.BCM)
+    for item in allLEDlist:
+        GPIO.setup(ledCONFIG[item]['gpioNum'],
+                   GPIO.OUT, GPIO.PUD_OFF, GPIO.LOW)
+        globals()[item+'p'] = GPIO.PWM(ledCONFIG[item]
+                                       ['gpioNum'], ledCONFIG[item]['default']['freq'])
+        globals()[item+'p'].start(ledCONFIG[item]['default']['dutyCycle'])
+    return 'All LED pWM is enable and stay in default status.'
 
 
 def stopGPIOpwm():
-    # Function to stop LED PWM and reset all LED GPIO
-    for item in allLED:
+    '''
+    Function to stop LED PWM and reset all LED GPIO
+    '''
+    for item in allLEDlist:
         globals()[item+'p'].stop()
         GPIO.cleanup(ledCONFIG[item]['gpioNum'])
-    print('All LED PWN is stop & reset')
+    return 'All LED PWN is stop & reset.'
 
 
-def socketLED():
-    # Unix Domain Socket for inter process communication
+def ledSocket():
+    '''
+    Unix Domain Socket for inter process communication
+    '''
     try:
-        # Check the socket status
+        # Check the socket status; if occupied, reset it.
         if os.path.exists(serverAddress):
             os.unlink(serverAddress)
         # Create the Unix Domain Socket
@@ -72,16 +134,18 @@ def socketLED():
             connection, address = sock.accept()
             serverIncoming = connection.recv(1024).decode()
             try:
+                global remoteCMDlist
                 remoteCMDlist = serverIncoming.split(':')
+                print('Received incoming message: {}.....'.format(
+                    remoteCMDlist), file=sys.stderr)
                 if remoteCMDlist[0] == 'query':
-                    serverOutput = 'You execute a query command.'
-                    connection.send(serverOutput.encode('utf-8'))
-                    serverOutput = str(remoteCMDlist[1:])
+                    queryResult = configQuery(remoteCMDlist)
+                    serverOutput = 'Query result: ' + str(queryResult)
                     connection.send(serverOutput.encode('utf-8'))
                 elif remoteCMDlist[0] == 'set':
                     serverOutput = 'You execute a set command.'
-                    connection.send(serverOutput.encode('utf-8'))
-                    serverOutput = str(remoteCMDlist[1:])
+                    setResult = configChange(remoteCMDlist)
+                    serverOutput = 'Set result: ' + str(setResult)
                     connection.send(serverOutput.encode('utf-8'))
                 else:
                     serverOutput = 'Not a valid command, check your syntax.'
@@ -95,4 +159,12 @@ def socketLED():
         sock.close()
 
 
-socketLED()
+def main():
+    configInit()
+    threadSocket = threading.Thread(target=ledSocket)
+    threadSocket.setDaemon(True)
+    threadSocket.start()
+
+
+if __name__ == '__main__':
+    main()

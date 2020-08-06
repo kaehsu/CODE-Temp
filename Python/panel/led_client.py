@@ -11,19 +11,22 @@ def main():
         while True:
             message = input(
                 'Enter the message send to server ("Quit" to quit): ')
-            if message:
-                if message == 'Quit':
-                    raise SystemExit
-                sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-                sock.connect(serverAddress)
-                sock.send(message.encode('utf-8'))
-                #r = sock.recv(1024)
-                print('Receiving message "{}" from server.\n'.format(
-                    sock.recv(1024).decode()))
-                sock.close()
-            else:
-                print('You have to enter something.....\n')
-                continue
+            try:
+                if message:
+                    if message == 'Quit':
+                        raise SystemExit
+                    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+                    sock.connect(serverAddress)
+                    sock.send(message.encode('utf-8'))
+                    #r = sock.recv(1024)
+                    print('Receiving message "{}" from server.\n'.format(
+                        sock.recv(1024).decode()))
+                    sock.close()
+                else:
+                    print('You have to enter something.....\n')
+                    continue
+            except ConnectionRefusedError:
+                print('\n The LED socket connection refused')
     except KeyboardInterrupt:
         print('\n')
         # sock.close()
