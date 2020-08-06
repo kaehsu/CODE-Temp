@@ -83,7 +83,11 @@ def configChange(dictKeylist):
             changeCMD = ccTargetpath+'='+str(ccTargetnew)
             exec(changeCMD)
             return 'Value ' + str(ccTargetold) + ' change to ' + str(ccTargetnew)
-        # elif
+        elif type(ccTargetold) == type(str()):
+            ccTargetnew = str(dictKeylist[-1])
+            changeCMD = ccTargetpath+"='"+str(ccTargetnew)+"'"
+            exec(changeCMD)
+            return 'Value ' + str(ccTargetold) + ' change to ' + str(ccTargetnew)
 
     except (NameError, TypeError, KeyError, ValueError) as e:
         return 'Not a valid change exp, check your syntax.'
