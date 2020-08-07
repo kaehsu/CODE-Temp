@@ -7,6 +7,7 @@ import socket
 import json
 # import RPi.GPIO as GPIO
 import threading
+import copy
 
 # LED configuration file and socket address
 ledCONFIGfile = 'portex_led.conf'
@@ -44,14 +45,12 @@ def configInit(configFile=ledCONFIGfile):
     global allLEDlist
     allLEDlist = tuple(ledCONFIG['allLED']['ledList'].split(','))
     for item in allLEDlist:
-        ledCONFIG[item].update(ledStatustemp)
+        # deepcopy could deuplicate ledStatustemp with different id, but need import copy first.
+        # All other attempts to try to duplicate ledStatustemp are failed.
+        ledCONFIG[item].update(copy.deepcopy(ledStatustemp))
+        print(id(ledCONFIG[item]['opMode']), id(ledCONFIG[item]['adMode']))
         # Didn't work, use the following statement instead
-        # ledCONFIG[item]['opMode'].update(ledCONFIG[item]['default'])
-    ledCONFIG['gLED']['opMode'].update(ledCONFIG['gLED']['default'])
-    ledCONFIG['rLED']['opMode'].update(ledCONFIG['rLED']['default'])
-    ledCONFIG['bLED']['opMode'].update(ledCONFIG['bLED']['default'])
-    ledCONFIG['yLED']['opMode'].update(ledCONFIG['yLED']['default'])
-    ledCONFIG['oLED']['opMode'].update(ledCONFIG['oLED']['default'])
+        ledCONFIG[item]['opMode'].update(ledCONFIG[item]['default'])
 
 
 def printConfig():
