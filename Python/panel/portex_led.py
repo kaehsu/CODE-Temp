@@ -27,16 +27,15 @@ def configInit(configFile=ledCONFIGfile):
         "lastMode": "opMode"
     }
     ledStatustemp = {
-        "status": {
-            "opMode": {
-                "freq": 1,
-                "dutyCycle": 0
-            },
-            "adMode": {
-                "freq": 1,
-                "dutyCycle": 0
-            }
+        "opMode": {
+            "freq": 1,
+            "dutyCycle": 0
+        },
+        "adMode": {
+            "freq": 1,
+            "dutyCycle": 0
         }
+
     }
     # Build LED configuration data structure
     ledCONFIG = json.loads(ledCONFIG)
@@ -46,7 +45,7 @@ def configInit(configFile=ledCONFIGfile):
     allLEDlist = ledCONFIG['allLED']['ledList'].split(',')
     for item in allLEDlist:
         ledCONFIG[item].update(ledStatustemp)
-        ledCONFIG[item]['status']['opMode'].update(ledCONFIG[item]['default'])
+        ledCONFIG[item]['opMode'].update(ledCONFIG[item]['default'])
 
 
 def configQuery(dictKeylist):
@@ -167,6 +166,7 @@ def main():
     threadSocket = threading.Thread(target=ledSocket)
     threadSocket.setDaemon(True)
     threadSocket.start()
+    # stopGPIOpwm()
 
 
 if __name__ == '__main__':
