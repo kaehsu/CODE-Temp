@@ -29,11 +29,11 @@ def configInit(configFile=ledCONFIGfile):
     ledStatustemp = {
         "status": {
             "opMode": {
-                "freq": 0,
+                "freq": 1,
                 "dutyCycle": 0
             },
             "adMode": {
-                "freq": 0,
+                "freq": 1,
                 "dutyCycle": 0
             }
         }
