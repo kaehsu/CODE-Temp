@@ -12,19 +12,19 @@ ledCONFIGfile = 'portex_led.conf'
 serverAddress = '/tmp/portex_led'
 
 
-def configInit():
+def configInit(configFile=ledCONFIGfile):
     '''
     Initial the LED configuration data structure
     '''
     # Read configuration file
     global ledCONFIG
-    with open(ledCONFIGfile, 'r') as file:
+    with open(configFile, 'r') as file:
         ledCONFIG = file.read()
     # Data structure that did not be included in configuration file
-    aledStatustemp = {
-        "aledList": "gLED,rLED,bLED,yLED,oLED",
-        "currentStatus": "opMode",
-        "lastStatus": "opMode"
+    ledModetemp = {
+        "ledList": "gLED,rLED,bLED,yLED,oLED",
+        "currentMode": "opMode",
+        "lastMode": "opMode"
     }
     ledStatustemp = {
         "status": {
@@ -40,10 +40,10 @@ def configInit():
     }
     # Build LED configuration data structure
     ledCONFIG = json.loads(ledCONFIG)
-    ledCONFIG['allLED'].update(aledStatustemp)
-    ledCONFIG['allLED']['powerSave']['powerSavetimer'] = ledCONFIG['allLED']['powerSave']['powerSavetimeout']
+    ledCONFIG['allLED'].update(ledModetemp)
+    ledCONFIG['allLED']['powerSave']['timer'] = ledCONFIG['allLED']['powerSave']['timeout']
     global allLEDlist
-    allLEDlist = ledCONFIG['allLED']['aledList'].split(',')
+    allLEDlist = ledCONFIG['allLED']['ledList'].split(',')
     for item in allLEDlist:
         ledCONFIG[item].update(ledStatustemp)
         ledCONFIG[item]['status']['opMode'].update(ledCONFIG[item]['default'])
@@ -88,7 +88,6 @@ def configChange(dictKeylist):
             changeCMD = ccTargetpath+"='"+str(ccTargetnew)+"'"
             exec(changeCMD)
             return 'Value ' + str(ccTargetold) + ' change to ' + str(ccTargetnew)
-
     except (NameError, TypeError, KeyError, ValueError) as e:
         return 'Not a valid change exp, check your syntax.'
 
@@ -144,12 +143,11 @@ def ledSocket():
                     remoteCMDlist), file=sys.stderr)
                 if remoteCMDlist[0] == 'query':
                     queryResult = configQuery(remoteCMDlist)
-                    serverOutput = 'Query result: ' + str(queryResult)
+                    serverOutput = str(queryResult)
                     connection.send(serverOutput.encode('utf-8'))
                 elif remoteCMDlist[0] == 'set':
-                    serverOutput = 'You execute a set command.'
                     setResult = configChange(remoteCMDlist)
-                    serverOutput = 'Set result: ' + str(setResult)
+                    serverOutput = 'set result: ' + str(setResult)
                     connection.send(serverOutput.encode('utf-8'))
                 else:
                     serverOutput = 'Not a valid command, check your syntax.'

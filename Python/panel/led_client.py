@@ -3,6 +3,7 @@
 # To communicate with UDS server by nc: "echo -e "string\c" | sudo nc -q 1 -U /var/run/uds_led"
 
 import socket
+from pprint import pprint
 serverAddress = '/tmp/portex_led'
 
 
@@ -10,7 +11,7 @@ def main():
     try:
         while True:
             message = input(
-                'Enter the message send to server ("Quit" to quit): ')
+                '\nEnter the message send to the server \n("Quit" to quit): ')
             try:
                 if message:
                     if message == 'Quit':
@@ -18,10 +19,13 @@ def main():
                     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
                     sock.connect(serverAddress)
                     sock.send(message.encode('utf-8'))
-                    #r = sock.recv(1024)
-                    print('Receiving message "{}" from server.\n'.format(
-                        sock.recv(1024).decode()))
-                    sock.close()
+                    recvMessage = sock.recv(1024).decode('utf-8')
+                    try:
+                        pprint(eval(recvMessage))
+                        sock.close()
+                    except (SyntaxError, NameError):
+                        print(recvMessage)
+                        sock.close()
                 else:
                     print('You have to enter something.....\n')
                     continue
@@ -29,7 +33,6 @@ def main():
                 print('\n The LED socket connection refused')
     except KeyboardInterrupt:
         print('\n')
-        # sock.close()
 
 
 if __name__ == '__main__':
