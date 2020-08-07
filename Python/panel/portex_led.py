@@ -163,6 +163,7 @@ def ledSocket():
 
 def main():
     configInit()
+    # initGPIOpwm()
     threadSocket = threading.Thread(target=ledSocket)
     threadSocket.setDaemon(True)
     threadSocket.start()
