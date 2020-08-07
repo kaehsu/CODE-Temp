@@ -2,6 +2,7 @@
 
 import os
 import sys
+from pprint import pprint
 import socket
 import json
 # import RPi.GPIO as GPIO
@@ -28,24 +29,33 @@ def configInit(configFile=ledCONFIGfile):
     }
     ledStatustemp = {
         "opMode": {
-            "freq": 1,
+            "freq": 0,
             "dutyCycle": 0
         },
         "adMode": {
-            "freq": 1,
+            "freq": 0,
             "dutyCycle": 0
         }
-
     }
     # Build LED configuration data structure
     ledCONFIG = json.loads(ledCONFIG)
     ledCONFIG['allLED'].update(ledModetemp)
     ledCONFIG['allLED']['powerSave']['timer'] = ledCONFIG['allLED']['powerSave']['timeout']
     global allLEDlist
-    allLEDlist = ledCONFIG['allLED']['ledList'].split(',')
+    allLEDlist = tuple(ledCONFIG['allLED']['ledList'].split(','))
     for item in allLEDlist:
         ledCONFIG[item].update(ledStatustemp)
-        ledCONFIG[item]['opMode'].update(ledCONFIG[item]['default'])
+        # Didn't work, use the following statement instead
+        # ledCONFIG[item]['opMode'].update(ledCONFIG[item]['default'])
+    ledCONFIG['gLED']['opMode'].update(ledCONFIG['gLED']['default'])
+    ledCONFIG['rLED']['opMode'].update(ledCONFIG['rLED']['default'])
+    ledCONFIG['bLED']['opMode'].update(ledCONFIG['bLED']['default'])
+    ledCONFIG['yLED']['opMode'].update(ledCONFIG['yLED']['default'])
+    ledCONFIG['oLED']['opMode'].update(ledCONFIG['oLED']['default'])
+
+
+def printConfig():
+    return(ledCONFIG)
 
 
 def configQuery(dictKeylist):
