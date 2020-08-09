@@ -5,9 +5,9 @@ import sys
 from pprint import pprint
 import socket
 import json
-# import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 import threading
-import copy
+from copy import deepcopy
 
 # LED configuration file and socket address
 ledCONFIGfile = 'portex_led.conf'
@@ -47,7 +47,7 @@ def configInit(configFile=ledCONFIGfile):
     for item in allLEDlist:
         # deepcopy could deuplicate ledStatustemp with different id, but need import copy first.
         # All other attempts to try to duplicate ledStatustemp are failed.
-        ledCONFIG[item].update(copy.deepcopy(ledStatustemp))
+        ledCONFIG[item].update(deepcopy(ledStatustemp))
         print(id(ledCONFIG[item]['opMode']), id(ledCONFIG[item]['adMode']))
         # Didn't work, use the following statement instead
         ledCONFIG[item]['opMode'].update(ledCONFIG[item]['default'])
@@ -114,6 +114,17 @@ def initGPIOpwm():
     return 'All LED pWM is enable and stay in default status.'
 
 
+def changeGPIOpwm(tLED, tFreq, tDutycycle):
+    '''
+    Change LED status.
+    '''
+    if tLED not in allLEDlist:
+        return 'No such LED, check your LED name.'
+    globals()[tLED+'p'].ChangeFrequency(tFreq)
+    globals()[tLED+'p'].ChangeDutyCycle(tDutycycle)
+    return 'LED status changed'
+
+
 def stopGPIOpwm():
     '''
     Function to stop LED PWM and reset all LED GPIO
@@ -171,7 +182,7 @@ def ledSocket():
 
 def main():
     configInit()
-    # initGPIOpwm()
+    initGPIOpwm()
     threadSocket = threading.Thread(target=ledSocket)
     threadSocket.setDaemon(True)
     threadSocket.start()
