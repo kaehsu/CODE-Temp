@@ -8,6 +8,7 @@ import json
 import RPi.GPIO as GPIO
 import threading
 from copy import deepcopy
+import time
 
 # LED configuration file and socket address
 ledCONFIGfile = 'portex_led.conf'
@@ -114,7 +115,6 @@ def initGPIOpwm():
     return 'All LED pWM is enable and stay in default status.'
 
 
-NFIG[tLED][oriMode]['o
 def changeGPIOpwm(tLED, tFreq, tDutycycle, period=10):
     '''
     Change LED status.
@@ -128,7 +128,11 @@ def changeGPIOpwm(tLED, tFreq, tDutycycle, period=10):
     globals()[tLED+'p'].ChangeFrequency(tFreq)
     globals()[tLED+'p'].ChangeDutyCycle(tDutycycle)
     print('LED status is changed.')
-    time.sleep(period)    
+    waitTimeout = period
+    while waitTimeout > 0:
+        print('LED temp. change remain ' + str(waitTimeout) + ' seconds.')
+        waitTimeout -= 1
+        time.sleep(1)    
     globals()[tLED+'p'].ChangeFrequency(oriFreq)
     globals()[tLED+'p'].ChangeDutyCycle(oriDutycycle)
     return 'LED status is restored.' 
