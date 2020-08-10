@@ -114,15 +114,24 @@ def initGPIOpwm():
     return 'All LED pWM is enable and stay in default status.'
 
 
-def changeGPIOpwm(tLED, tFreq, tDutycycle):
+NFIG[tLED][oriMode]['o
+def changeGPIOpwm(tLED, tFreq, tDutycycle, period=10):
     '''
     Change LED status.
     '''
     if tLED not in allLEDlist:
         return 'No such LED, check your LED name.'
+    # Backup original LED status
+    oriMode = ledCONFIG['allLED']['currentMode']
+    oriFreq = ledCONFIG[tLED][oriMode]['freq']
+    oriDutycycle = ledCONFIG[tLED][oriMode]['dutyCycle']
     globals()[tLED+'p'].ChangeFrequency(tFreq)
     globals()[tLED+'p'].ChangeDutyCycle(tDutycycle)
-    return 'LED status changed'
+    print('LED status is changed.')
+    time.sleep(period)    
+    globals()[tLED+'p'].ChangeFrequency(oriFreq)
+    globals()[tLED+'p'].ChangeDutyCycle(oriDutycycle)
+    return 'LED status is restored.' 
 
 
 def stopGPIOpwm():
