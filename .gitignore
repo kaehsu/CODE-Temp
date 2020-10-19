@@ -141,3 +141,5 @@ dmypy.json
 cython_debug/
 #c 2020 GitHub, Inc.
 
+.gitignore
+.vscode
