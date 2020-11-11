@@ -11,7 +11,7 @@ from copy import deepcopy
 import time
 
 # LED configuration file and socket address
-ledCONFIGfile = 'portex_led.conf'
+ledCONFIGfile = '/home/pi/CODE-temp/Python/LED/portex_led.conf'
 serverAddress = '/tmp/portex_led'
 
 
@@ -132,10 +132,10 @@ def changeGPIOpwm(tLED, tFreq, tDutycycle, period=10):
     while waitTimeout > 0:
         print('LED temp. change remain ' + str(waitTimeout) + ' seconds.')
         waitTimeout -= 1
-        time.sleep(1)    
+        time.sleep(1)
     globals()[tLED+'p'].ChangeFrequency(oriFreq)
     globals()[tLED+'p'].ChangeDutyCycle(oriDutycycle)
-    return 'LED status is restored.' 
+    return 'LED status is restored.'
 
 
 def stopGPIOpwm():
@@ -191,6 +191,7 @@ def ledSocket():
     except KeyboardInterrupt:
         print('The server daemon stop!', file=sys.stderr)
         sock.close()
+        stopGPIOpwm()
 
 
 def main():
@@ -199,7 +200,8 @@ def main():
     threadSocket = threading.Thread(target=ledSocket)
     threadSocket.setDaemon(True)
     threadSocket.start()
-    # stopGPIOpwm()
+    time.sleep(86400)
+    stopGPIOpwm()
 
 
 if __name__ == '__main__':
