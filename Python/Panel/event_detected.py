@@ -26,8 +26,12 @@ periodList = {'btnP': listP, 'btnA': listA, 'btnB': listB}
 def calculate_period(btnName, btnTime):
     periodList.get(btnName).append(btnTime)
     if len(periodList.get(btnName)) == 2:
-        print("Button {} press interval is {}".format(
-            btnName, (periodList.get(btnName)[1] - periodList.get(btnName)[0]).seconds))
+        diffSec = (periodList.get(btnName)[
+                   1] - periodList.get(btnName)[0]).seconds
+        diffmSec = (periodList.get(btnName)[
+                    1] - periodList.get(btnName)[0]).microseconds
+        print("Button {} press interval is {}.{} seconds".format(
+            btnName, diffSec, diffmSec))
         periodList.get(btnName).clear()
 
 
