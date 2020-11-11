@@ -4,16 +4,18 @@ import RPi.GPIO as GPIO
 import time
 from datetime import datetime
 import os
+import threading
 
 #
 # Define GPIO# and mapping button name
 btnMapping = {'22': 'btnP', '27': 'btnA', '17': 'btnB'}
 
 #
-# GPIO button initial
-GPIO.setmode(GPIO.BCM)
-for item in btnMapping.keys():
-    GPIO.setup(int(item), GPIO.IN)
+# Create button status
+# Use list
+# btnStatus = [0, 0, 0]
+# Use dictionary
+btnStatus = {'btnP': 0, 'btnA': 0, 'btnB': 0}
 
 #
 # Button period list initial
@@ -21,6 +23,12 @@ listP = []
 listA = []
 listB = []
 periodList = {'btnP': listP, 'btnA': listA, 'btnB': listB}
+
+#
+# GPIO button initial
+GPIO.setmode(GPIO.BCM)
+for item in btnMapping.keys():
+    GPIO.setup(int(item), GPIO.IN)
 
 
 def calculate_period(btnName, btnTime):
@@ -33,6 +41,9 @@ def calculate_period(btnName, btnTime):
         print("Button {} press interval is {}.{} seconds".format(
             btnName, diffSec, diffmSec))
         periodList.get(btnName).clear()
+        btnStatus[btnName] = 0
+    else:
+        btnStatus[btnName] = 1
 
 
 def event_occurred(pin):
@@ -43,8 +54,8 @@ def event_occurred(pin):
 
 
 for item in btnMapping.keys():
-    GPIO.add_event_detect(
-        int(item), GPIO.BOTH, callback=event_occurred, bouncetime=32)
+    GPIO.add_event_detect(int(item), GPIO.BOTH,
+                          callback=event_occurred, bouncetime=32)
 
 try:
     while True:
