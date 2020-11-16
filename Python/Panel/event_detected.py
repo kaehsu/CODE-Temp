@@ -32,13 +32,20 @@ for item in btnMapping.keys():
 
 
 def calculate_period(btnName, btnTime):
+    '''
+    Calculate time period between two button actions
+    '''
+    print("The length of {} before appending is {}".format(
+        btnName, len(periodList.get(btnName))))
     periodList.get(btnName).append(btnTime)
+    print("The length of {} after appending is {}".format(
+        btnName, len(periodList.get(btnName))))
     if len(periodList.get(btnName)) == 2:
         diffSec = (periodList.get(btnName)[
                    1] - periodList.get(btnName)[0]).seconds
         diffmSec = (periodList.get(btnName)[
                     1] - periodList.get(btnName)[0]).microseconds
-        print("Button {} press interval is {}.{} seconds".format(
+        print("Button {} press interval is {}.{} seconds\n".format(
             btnName, diffSec, diffmSec))
         periodList.get(btnName).clear()
         btnStatus[btnName] = 0
