@@ -4,25 +4,32 @@ import RPi.GPIO as GPIO
 import time
 from datetime import datetime
 import os
+from random import randint
 import threading
+import signal
 
 #
-# Define GPIO# and mapping button name
+# Define GPIO# and mapping to the button name
 btnMapping = {'22': 'btnP', '27': 'btnA', '17': 'btnB'}
 
 #
-# Create button status
-# Use list
-# btnStatus = [0, 0, 0]
+# Maintain button status
 # Use dictionary
-btnStatus = {'btnP': 0, 'btnA': 0, 'btnB': 0}
+statP, statA, statB = [], [], []
+btnStatus = {'btnP': statP, 'btnA': statA, 'btnB': statB}
 
 #
-# Button period list initial
-listP = []
-listA = []
-listB = []
+# Button press period list initial
+listP, listA, listB = [], [], []
 periodList = {'btnP': listP, 'btnA': listA, 'btnB': listB}
+
+#
+# Button press timeout
+btnTimeout = 6
+
+#
+# Define SIGNAL handling
+
 
 #
 # GPIO button initial
@@ -31,40 +38,67 @@ for item in btnMapping.keys():
     GPIO.setup(int(item), GPIO.IN)
 
 
-def calculate_period(btnName, btnTime):
+def exportResult(btnName, pressPeriodSec, pressPeriodmSec):
+    print("Button {} press interval is {:03d}.{:06d} seconds\n".format(
+        btnName, pressPeriodSec, pressPeriodmSec))
+
+
+def countDown(btnName, btnTimeout, btnSessionID):
+    while btnTimeout > 0:
+        time.sleep(1)
+        btnTimeout -= 1
+    if len(btnStatus.get(btnName)) > 0 and btnSessionID == btnStatus.get(btnName)[1]:
+        # print("Button {} timeout, session ID: {}".format(btnName, btnSessionID))
+        btnStatus.get(btnName).append('reset')
+        # print(btnStatus.get(btnName), len(btnStatus.get(btnName)))
+        exportResult(btnName, 6, 0)
+
+
+def periodCalc(pin):
     '''
     Calculate time period between two button actions
     '''
-    print("The length of {} before appending is {}".format(
-        btnName, len(periodList.get(btnName))))
+    btnName = btnMapping.get(str(pin))
+    btnTime = datetime.now()
+    # print("The length of {} before appending is {}".format(btnName, len(periodList.get(btnName))))
     periodList.get(btnName).append(btnTime)
-    print("The length of {} after appending is {}".format(
-        btnName, len(periodList.get(btnName))))
-    if len(periodList.get(btnName)) == 2:
+    # print("The length of {} after appending is {}".format(btnName, len(periodList.get(btnName))))
+    #
+    # Check if the button is reseted
+    if len(btnStatus.get(btnName)) == 3:
+        print("Ignore button {} action this time.\n".format(btnName))
+        periodList.get(btnName).clear()
+        btnStatus.get(btnName).clear()
+    #
+    #
+    # If the button is pressed & released, calculate the period
+    elif len(periodList.get(btnName)) == 2:
         diffSec = (periodList.get(btnName)[
                    1] - periodList.get(btnName)[0]).seconds
         diffmSec = (periodList.get(btnName)[
                     1] - periodList.get(btnName)[0]).microseconds
-        print("Button {} press interval is {}.{} seconds\n".format(
-            btnName, diffSec, diffmSec))
+        exportResult(btnName, diffSec, diffmSec)
         periodList.get(btnName).clear()
-        btnStatus[btnName] = 0
+        btnStatus.get(btnName).clear()
     else:
-        btnStatus[btnName] = 1
-
-
-def event_occurred(pin):
-    # GPIO.remove_event_detect(pin)
-    # print('Button {} is pressed at {}.'.format(btnMapping.get(str(pin)), datetime.now()))
-    # GPIO.add_event_detect(pin, GPIO.BOTH, callback = event_occurred, bouncetime = 300)
-    calculate_period(btnMapping.get(str(pin)), datetime.now())
+        btnStatus.get(btnName).append(1)
+        btnSessionID = randint(65000, 65535)
+        btnStatus.get(btnName).append(btnSessionID)
+        #
+        #
+        # Start to button pressed countdown
+        p = threading.Thread(target=countDown, args=(
+            btnName, btnTimeout, btnSessionID,))
+        p.start()
+        print("Button {}, id {} is pressed and waiting for release.....".format(
+            btnName, btnStatus.get(btnName)[1]))
 
 
 #
-# By testing, long bouncetime(>=2ms) will cause button action not being detected (extreming condition)
+# By real evaluating, long bouncetime cause button action not being detected easy (extreming condition)
 for item in btnMapping.keys():
     GPIO.add_event_detect(int(item), GPIO.BOTH,
-                          callback=event_occurred, bouncetime=1)
+                          callback=periodCalc, bouncetime=1)
 
 try:
     while True:
@@ -73,7 +107,6 @@ try:
         print('Clear monitor after 2 second')
         time.sleep(2)
         os.system("clear")
-        pass
 except KeyboardInterrupt:
     pass
 GPIO.cleanup()
