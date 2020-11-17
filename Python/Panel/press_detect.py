@@ -60,9 +60,11 @@ def event_occurred(pin):
     calculate_period(btnMapping.get(str(pin)), datetime.now())
 
 
+#
+# By testing, long bouncetime(>=2ms) will cause button action not being detected (extreming condition)
 for item in btnMapping.keys():
     GPIO.add_event_detect(int(item), GPIO.BOTH,
-                          callback=event_occurred, bouncetime=32)
+                          callback=event_occurred, bouncetime=1)
 
 try:
     while True:
