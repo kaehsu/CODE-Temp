@@ -6,7 +6,37 @@ from datetime import datetime
 import os
 from random import randint
 import threading
-import signal
+# import signal
+import argparse
+
+#
+# Read command line argument
+parser = argparse.ArgumentParser(
+    description='PORTEX Panel Program for Panel Button')
+parser.add_argument('-b', '--bouncetime', type=int,
+                    help='GPIO bouncetime in milliseconds, range 1ms to 512ms, default 64ms', default=64)
+parser.add_argument('-t', '--timeout', type=int,
+                    help='Button press timeout in seconds, range 2s to 16s, default 6s', default=6)
+cargs = parser.parse_args()
+
+#
+# Reasonable GPIO bouncetime check
+if 1 <= cargs.bouncetime <= 512:
+    gpioBouncetime = cargs.bouncetime
+    print(gpioBouncetime)
+else:
+    print('Out of suggestted bouncetime range, change bouncetime to default {}ms.'.format(64))
+    gpioBouncetime = 64
+
+#
+# Reasonable button timeout check
+if 2 <= cargs.timeout <= 16:
+    cbtnTimeout = cargs.timeout
+    print(cbtnTimeout)
+else:
+    print('Out of suggestted timeout range, change timeout to default {} seconds.'.format(6))
+    cbtnTimeout = 6
+
 
 #
 # Define GPIO# and mapping to the button name
@@ -24,12 +54,7 @@ listP, listA, listB = [], [], []
 periodList = {'btnP': listP, 'btnA': listA, 'btnB': listB}
 
 #
-# Button press timeout
-btnTimeout = 6
-
-#
 # Define SIGNAL handling
-
 
 #
 # GPIO button initial
@@ -39,11 +64,17 @@ for item in btnMapping.keys():
 
 
 def exportResult(btnName, pressPeriodSec, pressPeriodmSec):
+    '''
+    Export button action result.
+    '''
     print("Button {} press interval is {:03d}.{:06d} seconds\n".format(
         btnName, pressPeriodSec, pressPeriodmSec))
 
 
 def countDown(btnName, btnTimeout, btnSessionID):
+    '''
+    Each time a button is pressed, a timer will start to countdown for button timeout.
+    '''
     while btnTimeout > 0:
         time.sleep(1)
         btnTimeout -= 1
@@ -51,12 +82,12 @@ def countDown(btnName, btnTimeout, btnSessionID):
         # print("Button {} timeout, session ID: {}".format(btnName, btnSessionID))
         btnStatus.get(btnName).append('reset')
         # print(btnStatus.get(btnName), len(btnStatus.get(btnName)))
-        exportResult(btnName, 6, 0)
+        exportResult(btnName, cbtnTimeout, 0)
 
 
 def periodCalc(pin):
     '''
-    Calculate time period between two button actions
+    Calculate time period between two button actions.
     '''
     btnName = btnMapping.get(str(pin))
     btnTime = datetime.now()
@@ -74,9 +105,9 @@ def periodCalc(pin):
     # If the button is pressed & released, calculate the period
     elif len(periodList.get(btnName)) == 2:
         diffSec = (periodList.get(btnName)[
-                   1] - periodList.get(btnName)[0]).seconds
+            1] - periodList.get(btnName)[0]).seconds
         diffmSec = (periodList.get(btnName)[
-                    1] - periodList.get(btnName)[0]).microseconds
+            1] - periodList.get(btnName)[0]).microseconds
         exportResult(btnName, diffSec, diffmSec)
         periodList.get(btnName).clear()
         btnStatus.get(btnName).clear()
@@ -88,7 +119,7 @@ def periodCalc(pin):
         #
         # Start to button pressed countdown
         p = threading.Thread(target=countDown, args=(
-            btnName, btnTimeout, btnSessionID,))
+            btnName, cbtnTimeout, btnSessionID,))
         p.start()
         print("Button {}, id {} is pressed and waiting for release.....".format(
             btnName, btnStatus.get(btnName)[1]))
@@ -98,13 +129,13 @@ def periodCalc(pin):
 # By real evaluating, long bouncetime cause button action not being detected easy (extreming condition)
 for item in btnMapping.keys():
     GPIO.add_event_detect(int(item), GPIO.BOTH,
-                          callback=periodCalc, bouncetime=1)
+                          callback=periodCalc, bouncetime=gpioBouncetime)
 
 try:
     while True:
         # print('Waiting button to be pressed.....')
         time.sleep(32)
-        print('Clear monitor after 2 second')
+        print('Clear monitor after 2 seconds')
         time.sleep(2)
         os.system("clear")
 except KeyboardInterrupt:
