@@ -6,11 +6,11 @@ from datetime import datetime
 import os
 from random import randint
 import threading
-# import signal
+import signal
 import argparse
 
 #
-# Read command line argument
+# Command line argument
 parser = argparse.ArgumentParser(
     description='PORTEX Panel Program for Panel Button')
 parser.add_argument('-b', '--bouncetime', type=int,
@@ -20,22 +20,25 @@ parser.add_argument('-t', '--timeout', type=int,
 cargs = parser.parse_args()
 
 #
-# Reasonable GPIO bouncetime check
+# Input GPIO bouncetime check
+# By serial testing, GPIO bouncetime should less than 512ms
 if 1 <= cargs.bouncetime <= 512:
     gpioBouncetime = cargs.bouncetime
-    print(gpioBouncetime)
+    print('Button GPIO bouncetime is {}ms.'.format(gpioBouncetime))
 else:
-    print('Out of suggestted bouncetime range, change bouncetime to default {}ms.'.format(64))
+    print('Out of suggestted bouncetime range, change bouncetime to default {} ms.'.format(64))
     gpioBouncetime = 64
 
 #
-# Reasonable button timeout check
+# Input button timeout check, maximun timeout is set to 16 seconds
+# Default is 6 seconds,
 if 2 <= cargs.timeout <= 16:
     cbtnTimeout = cargs.timeout
-    print(cbtnTimeout)
+    print('Button timeout is {} second(S)'.format(cbtnTimeout))
 else:
-    print('Out of suggestted timeout range, change timeout to default {} seconds.'.format(6))
     cbtnTimeout = 6
+    print('Out of suggestted timeout range, change timeout to default {} seconds.'.format(
+        cbtnTimeout))
 
 
 #
@@ -53,8 +56,6 @@ btnStatus = {'btnP': statP, 'btnA': statA, 'btnB': statB}
 listP, listA, listB = [], [], []
 periodList = {'btnP': listP, 'btnA': listA, 'btnB': listB}
 
-#
-# Define SIGNAL handling
 
 #
 # GPIO button initial
@@ -125,11 +126,25 @@ def periodCalc(pin):
             btnName, btnStatus.get(btnName)[1]))
 
 
+def kbInterrupt(signum, frame):
+    GPIO.cleanup()
+    raise KeyboardInterrupt()
+
+
+def hangUP(signum, frame):
+    GPIO.cleanup()
+    exit()
+
+
 #
 # By real evaluating, long bouncetime cause button action not being detected easy (extreming condition)
 for item in btnMapping.keys():
     GPIO.add_event_detect(int(item), GPIO.BOTH,
                           callback=periodCalc, bouncetime=gpioBouncetime)
+
+
+signal.signal(signal.SIGINT, kbInterrupt)
+signal.signal(signal.SIGHUP, hangUP)
 
 try:
     while True:
@@ -140,4 +155,3 @@ try:
         os.system("clear")
 except KeyboardInterrupt:
     pass
-GPIO.cleanup()

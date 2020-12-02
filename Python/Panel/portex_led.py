@@ -2,16 +2,19 @@
 
 import os
 import sys
-from pprint import pprint
+#from pprint import pprint
 import socket
 import json
 import RPi.GPIO as GPIO
 import threading
 from copy import deepcopy
 import time
+import signal
 
-# LED configuration file and socket address
-ledCONFIGfile = '/home/pi/CODE-temp/Python/LED/portex_led.conf'
+#
+# PORTEX LED control program use a unix domain socket for communitation
+# Here define the LED configuration file and socket address
+ledCONFIGfile = '/home/pi/CODE-temp/Python/Panel/portex_led.conf'
 serverAddress = '/tmp/portex_led'
 
 
@@ -70,7 +73,7 @@ def configQuery(dictKeylist):
         for item in range(1, len(dictKeylist)):
             cqResult = cqResult[dictKeylist[item]]
         return cqResult
-    except (NameError, TypeError, KeyError) as e:
+    except (NameError, TypeError, KeyError):
         return 'Not a valid query, check your syntax.'
 
 
@@ -97,7 +100,7 @@ def configChange(dictKeylist):
             changeCMD = ccTargetpath+"='"+str(ccTargetnew)+"'"
             exec(changeCMD)
             return 'Value ' + str(ccTargetold) + ' change to ' + str(ccTargetnew)
-    except (NameError, TypeError, KeyError, ValueError) as e:
+    except (NameError, TypeError, KeyError, ValueError):
         return 'Not a valid change exp, check your syntax.'
 
 
@@ -105,6 +108,8 @@ def initGPIOpwm():
     '''
     GPIO initialization & enable all LED by default configuration.
     '''
+    if GPIO.getmode(ledCONFIG['gLED']['gpioNum']):
+        GPIO.cleanup
     GPIO.setmode(GPIO.BCM)
     for item in allLEDlist:
         GPIO.setup(ledCONFIG[item]['gpioNum'],
@@ -152,57 +157,60 @@ def ledSocket():
     '''
     Unix Domain Socket for inter process communication
     '''
-    try:
-        # Check the socket status; if occupied, reset it.
-        if os.path.exists(serverAddress):
-            os.unlink(serverAddress)
-        # Create the Unix Domain Socket
-        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        # Bind the UDS to the port
-        print('Starting up an PORTEX LED socket on {}.....'.format(
-            serverAddress), file=sys.stderr)
-        sock.bind(serverAddress)
-        # Listen the port
-        sock.listen(5)
-        # Process the incoming packet
-        while True:
-            connection, address = sock.accept()
-            serverIncoming = connection.recv(1024).decode()
-            try:
-                global remoteCMDlist
-                remoteCMDlist = serverIncoming.split(':')
-                print('Received incoming message: {}.....'.format(
-                    remoteCMDlist), file=sys.stderr)
-                if remoteCMDlist[0] == 'query':
-                    queryResult = configQuery(remoteCMDlist)
-                    serverOutput = str(queryResult)
-                    connection.send(serverOutput.encode('utf-8'))
-                elif remoteCMDlist[0] == 'set':
-                    setResult = configChange(remoteCMDlist)
-                    serverOutput = 'set result: ' + str(setResult)
-                    connection.send(serverOutput.encode('utf-8'))
-                else:
-                    serverOutput = 'Not a valid command, check your syntax.'
-                    connection.send(serverOutput.encode('utf-8'))
-            except KeyError:
+    # Check the socket status; if occupied, reset it.
+    if os.path.exists(serverAddress):
+        os.unlink(serverAddress)
+    # Create the Unix Domain Socket
+    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    # Bind the UDS to the port
+    print('Starting up an PORTEX LED socket on {}.....'.format(
+        serverAddress), file=sys.stderr)
+    sock.bind(serverAddress)
+    # Listen the port
+    sock.listen(5)
+    # Process the incoming packet
+    while True:
+        connection, address = sock.accept()
+        serverIncoming = connection.recv(1024).decode()
+        try:
+            global remoteCMDlist
+            remoteCMDlist = serverIncoming.split(':')
+            print('Received incoming message: {}.....'.format(
+                remoteCMDlist), file=sys.stderr)
+            if remoteCMDlist[0] == 'query':
+                queryResult = configQuery(remoteCMDlist)
+                serverOutput = str(queryResult)
+                connection.send(serverOutput.encode('utf-8'))
+            elif remoteCMDlist[0] == 'set':
+                setResult = configChange(remoteCMDlist)
+                serverOutput = 'set result: ' + str(setResult)
+                connection.send(serverOutput.encode('utf-8'))
+            else:
                 serverOutput = 'Not a valid command, check your syntax.'
                 connection.send(serverOutput.encode('utf-8'))
-            connection.close()
-    except KeyboardInterrupt:
-        print('The server daemon stop!', file=sys.stderr)
-        sock.close()
-        stopGPIOpwm()
+        except KeyError:
+            serverOutput = 'Not a valid command, check your syntax.'
+            connection.send(serverOutput.encode('utf-8'))
+        # connection.close()
 
 
-def main():
-    configInit()
-    initGPIOpwm()
-    threadSocket = threading.Thread(target=ledSocket)
-    threadSocket.setDaemon(True)
-    threadSocket.start()
-    time.sleep(86400)
+def kbInterrupt(signum, frame):
+    print('The server daemon stop!', file=sys.stderr)
     stopGPIOpwm()
+    raise KeyboardInterrupt()
 
 
-if __name__ == '__main__':
-    main()
+def hangUP(signum, frame):
+    stopGPIOpwm()
+    exit()
+
+
+signal.signal(signal.SIGINT, kbInterrupt)
+signal.signal(signal.SIGHUP, hangUP)
+
+configInit()
+initGPIOpwm()
+ledSocket()
+
+while True:
+    time.sleep(86400)
