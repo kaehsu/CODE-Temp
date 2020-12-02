@@ -191,13 +191,12 @@ def ledSocket():
         except KeyError:
             serverOutput = 'Not a valid command, check your syntax.'
             connection.send(serverOutput.encode('utf-8'))
-        # connection.close()
+        connection.close()
 
 
 def kbInterrupt(signum, frame):
-    print('The server daemon stop!', file=sys.stderr)
     stopGPIOpwm()
-    raise KeyboardInterrupt()
+    exit()
 
 
 def hangUP(signum, frame):
