@@ -1,0 +1,58 @@
+# This is the configuration file for portex_exec.py program
+# User could edit this file to define proper action when they press the button
+#
+
+#
+# Define the time internal among press, there are three sections:
+# First section: prdA < press period <= prdB
+# Second section: prdB < press period <= prdC
+# Third section: prdC < press period <= prdD
+# Forth secion: prdD < press period
+# The unit is second in float 
+btnPeriod:
+ prdA: 0.000000
+ prdB: 1.000000
+ prdC: 2.000000
+ prdD: 4.000000
+
+#
+# Define the program for button P each press action
+btnP_A: 
+ cmd: "wall Button P is pressed less than 1 seconds."
+
+btnP_B:
+ cmd: "wall Button P is pressed less than 2 seconds."
+
+btnP_C: 
+ cmd: "wall Button P is pressed less than 4 seconds."
+
+btnP_D:
+ cmd: "wall Button P is pressed more than 4 seconds."
+
+#
+# Define the program for button A each press action
+btnA_A: 
+ cmd: "ping -c 1 8.8.8.8 >/dev/null 2>&1"
+
+btnA_B:
+ cmd: "ping -c 2 8.8.8.8"
+
+btnA_C: 
+ cmd: "ping -c 3 8.8.8.8"
+
+btnA_D:
+ cmd: "ping -c 4 8.8.8.8"
+
+#
+# Define the program for button B each press action
+btnB_A: 
+ cmd: "ping -c 1 168.95.1.1 >/dev/null 2>&1"
+
+btnB_B:
+ cmd: "wall Button B is pressed less than 2 seconds."
+
+btnB_C: 
+ cmd: "wall Button B is pressed less than 4 seconds."
+
+btnB_D:
+ cmd: "wall Button B is pressed more than 4 seconds."
