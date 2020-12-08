@@ -41,6 +41,7 @@ class LED:
 if __name__ == "__main__":
     gLED = LED('gLED', 19)
     print(gLED.name)
+    gLED.init()
     gLED.on()
     time.sleep(3)
     gLED.changePWM(2, 50)
