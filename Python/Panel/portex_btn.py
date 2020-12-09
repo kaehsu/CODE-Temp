@@ -46,13 +46,12 @@ else:
 btnMapping = {'22': 'btnP', '27': 'btnA', '17': 'btnB'}
 
 #
-# Maintain button status
-# Use dictionary
+# Maintain button status by a dictionary
 statP, statA, statB = [], [], []
 btnStatus = {'btnP': statP, 'btnA': statA, 'btnB': statB}
 
 #
-# Button press period list initial
+# Button press period initial
 listP, listA, listB = [], [], []
 periodList = {'btnP': listP, 'btnA': listA, 'btnB': listB}
 
@@ -84,7 +83,8 @@ def countDown(btnName, btnTimeout, btnSessionID):
         btnStatus.get(btnName).append('reset')
         # print(btnStatus.get(btnName), len(btnStatus.get(btnName)))
         # exportResult(btnName, cbtnTimeout, 0)
-        execCMD(btnName, cbtnTimeout)
+        pCMD = threading.Thread(target=execCMD, args=(btnName, cbtnTimeout))
+        pCMD.start()
 
 
 def periodCalc(pin):
@@ -103,7 +103,6 @@ def periodCalc(pin):
         periodList.get(btnName).clear()
         btnStatus.get(btnName).clear()
     #
-    #
     # If the button is pressed & released, calculate the period
     elif len(periodList.get(btnName)) == 2:
         diffSec = (periodList.get(btnName)[
@@ -111,7 +110,9 @@ def periodCalc(pin):
         diffmSec = (periodList.get(btnName)[
             1] - periodList.get(btnName)[0]).microseconds
         # exportResult(btnName, diffSec, diffmSec)
-        execCMD(btnName, diffSec+diffmSec/1000000)
+        pCMD = threading.Thread(target=execCMD, args=(
+            btnName, diffSec+diffmSec/1000000))
+        pCMD.start()
         periodList.get(btnName).clear()
         btnStatus.get(btnName).clear()
     else:
@@ -121,9 +122,9 @@ def periodCalc(pin):
         #
         #
         # Start to button pressed countdown
-        p = threading.Thread(target=countDown, args=(
+        pBP = threading.Thread(target=countDown, args=(
             btnName, cbtnTimeout, btnSessionID,))
-        p.start()
+        pBP.start()
         # print("Button {}, id {} is pressed and waiting for release.....".format(btnName, btnStatus.get(btnName)[1]))
 
 
@@ -148,11 +149,6 @@ signal.signal(signal.SIGINT, kbInterrupt)
 
 try:
     while True:
-        # print('Waiting button to be pressed.....')
-        # time.sleep(32)
-        # print('Clear monitor after 2 seconds')
-        # time.sleep(2)
-        # os.system("clear")
         pass
 except KeyboardInterrupt:
     pass

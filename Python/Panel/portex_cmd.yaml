@@ -18,41 +18,41 @@ btnPeriod:
 #
 # Define the program for button P each press action
 btnP_A: 
- cmd: "wall Button P is pressed less than 1 seconds."
+ cmd: wall Button P is pressed less than 1 seconds.
 
 btnP_B:
- cmd: "wall Button P is pressed less than 2 seconds."
+ cmd: wall Button P is pressed less than 2 seconds.
 
 btnP_C: 
- cmd: "wall Button P is pressed less than 4 seconds."
+ cmd: wall Button P is pressed less than 4 seconds.
 
 btnP_D:
- cmd: "wall Button P is pressed more than 4 seconds."
+ cmd: wall Button P is pressed more than 4 seconds.
 
 #
 # Define the program for button A each press action
 btnA_A: 
- cmd: "ping -c 1 8.8.8.8 >/dev/null 2>&1"
+ cmd: ping -c 1 -W 2 8.8.8.8 >>/tmp/cmd_test 2>&1
 
 btnA_B:
- cmd: "ping -c 2 8.8.8.8"
+ cmd: ping -c 2 -W 2 8.8.8.8 >>/tmp/cmd_test 2>&1
 
 btnA_C: 
- cmd: "ping -c 3 8.8.8.8"
+ cmd: ping -c 3 -W 2 8.8.8.8 >>/tmp/cmd_test 2>&1
 
 btnA_D:
- cmd: "ping -c 4 8.8.8.8"
+ cmd: ping -c 4 -W 2 8.8.8.8 >>/tmp/cmd_test 2>&1
 
 #
 # Define the program for button B each press action
 btnB_A: 
- cmd: "ping -c 1 168.95.1.1 >/dev/null 2>&1"
+ cmd: echo 'Hello from button B < 1 second\n' >>/tmp/cmd_test
 
 btnB_B:
- cmd: "wall Button B is pressed less than 2 seconds."
+ cmd: echo 'Hello from button B < 2 second\n' >>/tmp/cmd_test
 
 btnB_C: 
- cmd: "wall Button B is pressed less than 4 seconds."
+ cmd: sudo service tacacs_plus start
 
 btnB_D:
- cmd: "wall Button B is pressed more than 4 seconds."
+ cmd: sudo service tacacs_plus stop

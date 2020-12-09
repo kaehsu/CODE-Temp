@@ -17,22 +17,19 @@ def execCMD(btnX, time):
         exit(1)
     if runCONFIG['btnPeriod']['prdA'] < pressTIME and pressTIME <= runCONFIG['btnPeriod']['prdB']:
         # print("Button {} exec {}".format(pressBTN, runCONFIG[pressBTN + '_A']['cmd']))
-        processRET = subprocess.call(
-            runCONFIG[pressBTN + '_A']['cmd'], shell=True)
+        pRET = subprocess.call(runCONFIG[pressBTN + '_A']['cmd'], shell=True)
     elif runCONFIG['btnPeriod']['prdB'] < pressTIME and pressTIME <= runCONFIG['btnPeriod']['prdC']:
         # print("Button {} exec {}".format(pressBTN, runCONFIG[pressBTN + '_B']['cmd']))
-        processRET = subprocess.call(
-            runCONFIG[pressBTN + '_B']['cmd'], shell=True)
+        pRET = subprocess.call(runCONFIG[pressBTN + '_B']['cmd'], shell=True)
     elif runCONFIG['btnPeriod']['prdC'] < pressTIME and pressTIME <= runCONFIG['btnPeriod']['prdD']:
         # print("Button {} exec {}".format(pressBTN, runCONFIG[pressBTN + '_C']['cmd']))
-        processRET = subprocess.call(
-            runCONFIG[pressBTN + '_C']['cmd'], shell=True)
+        pRET = subprocess.call(runCONFIG[pressBTN + '_C']['cmd'], shell=True)
     elif runCONFIG['btnPeriod']['prdD'] < pressTIME:
         # print("Button {} exec {}".format(pressBTN, runCONFIG[pressBTN + '_D']['cmd']))
-        processRET = subprocess.call(
-            runCONFIG[pressBTN + '_D']['cmd'], shell=True)
+        pRET = subprocess.call(runCONFIG[pressBTN + '_D']['cmd'], shell=True)
     else:
         print('No matched button name.')
+    # print(pRET)
 
 
 def main():
