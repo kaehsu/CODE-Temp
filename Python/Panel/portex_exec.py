@@ -3,6 +3,7 @@
 import yaml
 import subprocess
 import argparse
+from datetime import datetime
 
 with open('portex_cmd.yaml', 'r') as configFILE:
     CONFIG = configFILE.read()
@@ -12,24 +13,31 @@ runCONFIG = yaml.safe_load(CONFIG)
 def execCMD(btnX, time):
     pressBTN = btnX
     pressTIME = time
+    cmdSTART = datetime.today().strftime('%Y-%b-%d %H:%M:%S.%f')[:-3]
     if pressBTN not in ('btnA', 'btnB', 'btnP'):
         print("Check button name: button name should be btnP, btnA or btnB")
         exit(1)
     if runCONFIG['btnPeriod']['prdA'] < pressTIME and pressTIME <= runCONFIG['btnPeriod']['prdB']:
         # print("Button {} exec {}".format(pressBTN, runCONFIG[pressBTN + '_A']['cmd']))
-        pRET = subprocess.call(runCONFIG[pressBTN + '_A']['cmd'], shell=True)
+        runCMD = runCONFIG[pressBTN + '_A']['cmd']
+        pRET = subprocess.call(runCMD, shell=True)
     elif runCONFIG['btnPeriod']['prdB'] < pressTIME and pressTIME <= runCONFIG['btnPeriod']['prdC']:
         # print("Button {} exec {}".format(pressBTN, runCONFIG[pressBTN + '_B']['cmd']))
-        pRET = subprocess.call(runCONFIG[pressBTN + '_B']['cmd'], shell=True)
+        runCMD = runCONFIG[pressBTN + '_B']['cmd']
+        pRET = subprocess.call(runCMD, shell=True)
     elif runCONFIG['btnPeriod']['prdC'] < pressTIME and pressTIME <= runCONFIG['btnPeriod']['prdD']:
         # print("Button {} exec {}".format(pressBTN, runCONFIG[pressBTN + '_C']['cmd']))
-        pRET = subprocess.call(runCONFIG[pressBTN + '_C']['cmd'], shell=True)
+        runCMD = runCONFIG[pressBTN + '_C']['cmd']
+        pRET = subprocess.call(runCMD, shell=True)
     elif runCONFIG['btnPeriod']['prdD'] < pressTIME:
         # print("Button {} exec {}".format(pressBTN, runCONFIG[pressBTN + '_D']['cmd']))
-        pRET = subprocess.call(runCONFIG[pressBTN + '_D']['cmd'], shell=True)
+        runCMD = runCONFIG[pressBTN + '_D']['cmd']
+        pRET = subprocess.call(runCMD, shell=True)
     else:
         print('No matched button name.')
-    # print(pRET)
+    cmdEND = datetime.today().strftime('%Y-%b-%d %H:%M:%S.%f')[:-3]
+    with open('/tmp/portex_exec.log', 'at') as execLOG:
+        execLOG.write(cmdSTART + "\n" + runCMD + "\n" + cmdEND + "\n\n")
 
 
 def main():
