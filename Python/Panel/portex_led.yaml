@@ -1,0 +1,35 @@
+allLED:
+  powerSave:
+    mode: off
+    timeout: 300
+    modeList: DoReMi
+
+greenLED:
+  name: Green LED
+  gpioNum: 19
+  default_freq: 1
+  default_dutyCycle: 50
+
+redLED:
+  name: Red LED
+  gpioNum: 26
+  default_freq: 1
+  default_dutyCycle: 0
+
+blueLED:
+  name: Blue LED
+  gpioNum: 5
+  default_freq: 1
+  default_dutyCycle: 0
+
+yellowLED:
+  name: Yellow LED
+  gpioNum: 13
+  default_freq: 1
+  default_dutyCycle: 0
+
+orangeED:
+  name: Orange LED
+  gpioNum: 6
+  default_freq: 1
+  default_dutyCycle: 0
