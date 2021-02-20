@@ -12,26 +12,10 @@ import syslog
 # Connect the socket to the port where the server is listening
 server_address = '/var/run/uds_led'
 
-hardware = os.popen("cat /proc/cpuinfo | grep Hardware | awk '{print $3}'"
-                    ).readlines()[0].strip('\n')
-if (hardware == "BCM2835"):
-    GPIO.setmode(GPIO.BOARD)
-    # previous bread board setup
-    # POWER_BUTTON_PIN = 33
-    # ADMIN_BUTTON_PIN = 35
-    # MCSC_BUTTON_PIN = 37
-    # new circult board setup
-    POWER_BUTTON_PIN = 15
-    ADMIN_BUTTON_PIN = 13
-    MCSC_BUTTON_PIN = 11
-elif (hardware == "sun8iw11p1"):
-    GPIO.setmode(GPIO.BOARD)
-    POWER_BUTTON_PIN = 33
-    ADMIN_BUTTON_PIN = 35
-    MCSC_BUTTON_PIN = 37
-else:
-    print "No compatible hardware found! Check /dev/cpuinfo!"
-    quit()
+GPIO.setmode(GPIO.BOARD)
+POWER_BUTTON_PIN = 15
+ADMIN_BUTTON_PIN = 13
+MCSC_BUTTON_PIN = 11
 GPIO.setup(POWER_BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(ADMIN_BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(MCSC_BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -108,8 +92,8 @@ def power_callback(channel):
             send_command("green_blink")
             # subprocess.call(['/opt/mcs/tnlctl/bin/tnlctl.sh', 'stop'], shell=False)
             # subprocess.call(['/opt/mcs/submods/proxy/scripts/ctl.sh', 'stop'], shell=False)
-            print "MCS Cloud disconnect......."
-            syslog.syslog(syslog.LOG_INFO, "MCS cloud disconnect.")
+            # print "MCS Cloud disconnect......."
+            # syslog.syslog(syslog.LOG_INFO, "MCS cloud disconnect.")
             os.system('shutdown -h now')
             time.sleep(100)
     elif mode == 1:
@@ -165,25 +149,25 @@ def run_mcsc(type):
             # subprocess.call(['/opt/mcs/tnlctl/bin/tnlctl.sh', 'start'], shell=False)
             subprocess.call(['/usr/bin/wall', 'randletters run!'], shell=False)
             subprocess.call(['/home/pi/SenseHat/randletters.py'], shell=False)
-            print "MCS Cloud connect......."
-            syslog.syslog(syslog.LOG_INFO, "MCS cloud connect.")
+            # print "MCS Cloud connect......."
+            # syslog.syslog(syslog.LOG_INFO, "MCS cloud connect.")
         elif type == "stop":
             subprocess.call(['/usr/bin/wall', 'randletters run!'], shell=False)
             subprocess.call(['/home/pi/SenseHat/randletters.py'], shell=False)
             # subprocess.call(['/opt/mcs/tnlctl/bin/tnlctl.sh', 'stop'], shell=False)
             # subprocess.call(['/opt/mcs/submods/proxy/scripts/ctl.sh', 'stop'], shell=False)
-            print "MCS Cloud disconnect......."
-            syslog.syslog(syslog.LOG_INFO, "MCS cloud disconnect.")
+            # print "MCS Cloud disconnect......."
+            # syslog.syslog(syslog.LOG_INFO, "MCS cloud disconnect.")
     else:
         try:
             return_code = subprocess.call(command_list)
             temp_string = "Execute mcsc program " + str(command_list)
             temp_string += ", exit " + str(return_code) + "."
-            syslog.syslog(syslog.LOG_INFO, temp_string)
+            # syslog.syslog(syslog.LOG_INFO, temp_string)
         except:
             temp_string = 'mcsc command "' + str(command_list)
             temp_string += '" not found.'
-            syslog.syslog(syslog.LOG_WARNING, temp_string)
+            # syslog.syslog(syslog.LOG_WARNING, temp_string)
 
     return
 
@@ -205,7 +189,7 @@ def mcsc_callback(channel):
             GPIO.input(MCSC_BUTTON_PIN) == GPIO.LOW
         ):
             # admin and mcsc both held down after 1 second
-            print "mcsc operation mode mcsc+admin held down."
+            # print "mcsc operation mode mcsc+admin held down."
             return
 
         if op_white == 1:
@@ -225,7 +209,7 @@ def mcsc_callback(channel):
             GPIO.input(MCSC_BUTTON_PIN) == GPIO.LOW
         ):
             # admin and mcsc both held down after 1 second
-            print "mcsc admin mode mcsc+admin held down."
+            # print "mcsc admin mode mcsc+admin held down."
             return
 
         admin_index = 2
